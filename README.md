@@ -21,6 +21,5 @@ as an option will show you a small description for every command.
 Adding Commands
 ----------------------
 A new command can be added by adding a python file inside commands directory and
-create a class with the name Command. There is a template example that anyone
+create a class with the name Command. There is a template example that anyone 
 can use and write its own commands following the template.
-=======
