@@ -1,0 +1,16 @@
+#from optparse import make_option
+
+from . import AtlasCommand
+
+
+class Command(AtlasCommand):
+
+    help = 'Dummy Template.'
+
+    options = [
+        # Add your arg options here
+    ]
+
+    def run(self):
+        # write you main command stuff here
+        pass
