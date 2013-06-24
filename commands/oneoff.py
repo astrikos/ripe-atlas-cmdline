@@ -40,12 +40,16 @@ class Command(Command):
             ) % self.post_data
             if raw_input(confirm_msg) == 'y':
                 self.msm_id = self.create()
-                if self.msm_id:
-                    print 'A new oneoff UDM just created with id: %d' % self.msm_id
+                if not self.msm_id:
+                    return
+                print 'A new oneoff UDM just created with id: %d' % self.msm_id
             else:
                 print 'Just exiting.'
+                return
         except KeyboardInterrupt:
             return
+
+        # If all good with the creation of measurement
         # adjust sleep time
         if self.probes_number > 300 and self.probes_number < 1000:
             self.sleep_time = 15
