@@ -33,6 +33,9 @@ class AtlasCommand(object):
             print package_name
 
     def http_get(self, url):
+        '''
+        Common fuction that implements a http get given a url
+        '''
         req = urllib2.Request(url)
         req.add_header('Content-Type', 'application/json')
         req.add_header('Accept', 'application/json')
