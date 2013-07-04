@@ -21,7 +21,7 @@ class Command(Command):
     ]
 
     # Local option for this class
-    url_meta = 'https://atlas.ripe.net/api/v1/measurement/%s/?fields=probes'
+    url_meta = 'https://atlas.ripe.net/api/v1/measurement/%s/?fields=probes,result'
     sleep_time = 10
 
     def run(self):
