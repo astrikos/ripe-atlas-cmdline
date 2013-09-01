@@ -17,7 +17,7 @@ class Command(AtlasCommand):
     ]
 
     # Local option for this class
-    url = 'https://atlas.ripe.net/api/v1/measurement/%s/?fields='
+    url_path = '/api/v1/measurement/%s/?fields='
 
     def __init__(self, *args, **kwargs):
         super(Command, self).__init__(*args, **kwargs)
@@ -29,10 +29,12 @@ class Command(AtlasCommand):
             print 'You have to specify the measurement id.'
             self.safe_options = False
             return
+        self.url = '%s%s' % (
+            self.server, self.url_path % self.parser_options.msm_id
+        )
 
     def run(self):
-        url = self.url % self.parser_options.msm_id
-        results = self.http_get(url)
+        results = self.http_get(self.url)
         if not results:
             return
         print 'UDM #%d has the following metadata:\n%s' % (

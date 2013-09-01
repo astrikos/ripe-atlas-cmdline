@@ -10,8 +10,7 @@ from . import AtlasCommand
 class Command(AtlasCommand):
 
     help = 'Create a new RIPE Atlas UDM.'
-    #url = 'https://weir-dev.atlas.ripe.net/api/v1/measurement/?key=%s'
-    url = 'https://atlas.ripe.net/api/v1/measurement/?key=%s'
+    url_path = '/api/v1/measurement/?key=%s'
     post_data = {}
     options = [
         make_option(
@@ -37,7 +36,7 @@ class Command(AtlasCommand):
         try:
             f = open(self.parser_options.key_file, 'r')
             self.key = f.read()
-            self.url = self.url % self.key
+            self.url = '%s%s' % (self.server, self.url_path % self.key)
         except:
             print traceback.format_exc()
             print 'Error while reading configuration'

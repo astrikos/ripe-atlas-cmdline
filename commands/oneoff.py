@@ -21,7 +21,7 @@ class Command(Command):
     ]
 
     # Local option for this class
-    url_meta = 'https://atlas.ripe.net/api/v1/measurement/%s/?fields=probes,result'
+    url_path = '/api/v1/measurement/'
     sleep_time = 10
 
     def run(self):
@@ -70,7 +70,7 @@ class Command(Command):
         correct answer. If after waiting totally 20secs we don't get what we
         requested most likely we will never get them.
         '''
-        url_meta = self.url_meta % self.msm_id
+        url_meta = '%s%s%s/?fields=probes,result' % (self.server, self.url_path, self.msm_id)
         tries = 2
         for i, _ in enumerate(range(0, tries)):
             metadata = self.http_get(url_meta)
@@ -92,7 +92,7 @@ class Command(Command):
                 ) % (len(metadata['probes']), self.sleep_time)
                 time.sleep(self.sleep_time)
         self.nprobes = len(metadata['probes'])
-        self.url_results = 'https://atlas.ripe.net%s' % metadata['result']
+        self.url_results = '%s%s' % (self.server, metadata['result'])
 
         return True
 

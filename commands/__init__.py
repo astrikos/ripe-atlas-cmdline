@@ -10,6 +10,7 @@ class AtlasCommand(object):
     options = []
 
     def __init__(self, sys_args):
+        self.server = 'https://atlas.ripe.net'
         basic_options = [
             make_option(
                 '--help_text', action='store_true', dest='help_text',
