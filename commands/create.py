@@ -35,7 +35,7 @@ class Command(AtlasCommand):
             return
         try:
             f = open(self.parser_options.key_file, 'r')
-            self.key = f.read()
+            self.key = f.read().strip()
             self.url = '%s%s' % (self.server, self.url_path % self.key)
         except:
             print traceback.format_exc()
