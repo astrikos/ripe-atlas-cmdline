@@ -80,6 +80,7 @@ class Command(AtlasCommand):
         definitions['type'] = self.type
         if self.type == 'traceroute':
             self.trace_protocol = raw_input('Specify  Traceroute Protocol[ICMP/UDP]:')
+            definitions['protocol'] = self.trace_protocol
             while not self.trace_protocol:
                 self.self.trace_protocol = raw_input('Protocol is required:')
                 definitions['protocol'] = self.trace_protocol
