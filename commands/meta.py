@@ -17,7 +17,8 @@ class Command(AtlasCommand):
     ]
 
     # Local option for this class
-    url_path = '/api/v1/measurement/%s/?fields='
+    #url_path = '/api/v1/measurement/%d/?fields='
+    url_path = '/api/v1/measurement/%d/'
 
     def __init__(self, *args, **kwargs):
         super(Command, self).__init__(*args, **kwargs)
