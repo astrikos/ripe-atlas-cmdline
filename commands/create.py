@@ -17,6 +17,10 @@ class Command(AtlasCommand):
             '-f', '--file', type='string', dest='key_file',
             help='File containing api key.'
         ),
+        make_option(
+            '-p', '--post_file', type='string', dest='post_data_file',
+            help='File containing post data.'
+        ),
     ]
 
     def __init__(self, *args, **kwargs):
@@ -46,20 +50,29 @@ class Command(AtlasCommand):
         Main function that collects all users information from stdin, and
         creates a new UDM.
         '''
-        try:
-            self.stdin_options()
-            confirm_msg = (
-                'You are about to create a new RIPE Atlas UDM with the '
-                'following details:\n%s\n[y/n]:'
-            ) % self.post_data
-            if raw_input(confirm_msg) == 'y':
-                msm_id = self.create()
-                if msm_id:
-                    print 'A new UDM just created with id: %d' % msm_id
-            else:
-                print 'Just exiting.'
-        except KeyboardInterrupt:
-            return
+        # if we have a file with ready post data skip reading from stdin and do
+        # request.
+        if self.parser_options.post_data_file:
+            f = open(self.parser_options.post_data_file, 'r')
+            self.post_data = json.loads(f.read().strip())
+            msm_id = self.create()
+            if msm_id:
+                print 'A new UDM just created with id: %d' % msm_id
+        else:
+            try:
+                self.stdin_options()
+                confirm_msg = (
+                    'You are about to create a new RIPE Atlas UDM with the '
+                    'following details:\n%s\n[y/n]:'
+                ) % self.post_data
+                if raw_input(confirm_msg) == 'y':
+                    msm_id = self.create()
+                    if msm_id:
+                        print 'A new UDM just created with id: %d' % msm_id
+                else:
+                    print 'Just exiting.'
+            except KeyboardInterrupt:
+                pass
 
     def stdin_options(self):
         '''
