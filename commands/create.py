@@ -105,8 +105,9 @@ class Command(AtlasCommand):
             self.is_oneoff = False
         definitions['is_oneoff'] = 'true' if self.is_oneoff else 'false'
         if not self.is_oneoff:
-            self.interval = raw_input('Specify Interval:')
-            definitions['interval'] = self.interval
+            interval = raw_input('Specify Interval:')
+            if interval:
+                definitions['interval'] = interval
         if raw_input('Do you need any additional options [y/n]:') == 'y':
             additional_options = {}
             while True:
@@ -130,7 +131,7 @@ class Command(AtlasCommand):
                 'Specify End Time [Unix Timestamp\Leave blank for never]:'
             )
             if self.end_time != '':
-                self.post_data['end_time'] = self.end_time
+                self.post_data['stop_time'] = self.end_time
         # probes part
         probes = {}
         while True:
@@ -165,9 +166,9 @@ class Command(AtlasCommand):
         req.add_header('Accept', 'application/json')
         try:
             response = urllib2.urlopen(req, post_data)
-        except:
-            print 'Problem with HTTP request.'
-            print traceback.format_exc()
+        except urllib2.HTTPError as e:
+            log = "HTTP ERROR %d: %s <%s>" % (e.code, e.msg, e.read())
+            print log
             return False
         response = json.load(response)
         return response['measurements'][0]
