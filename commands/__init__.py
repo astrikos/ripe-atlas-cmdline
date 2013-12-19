@@ -42,9 +42,9 @@ class AtlasCommand(object):
         req.add_header('Accept', 'application/json')
         try:
             response = urllib2.urlopen(req)
-        except:
-            print 'Problem with HTTP request.'
-            print traceback.format_exc()
+        except urllib2.HTTPError as e:
+            log = "HTTP ERROR %d: %s <%s>" % (e.code, e.msg, e.read())
+            print log
             return False
         data = json.load(response)
         return data
