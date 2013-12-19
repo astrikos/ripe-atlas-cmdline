@@ -64,32 +64,23 @@ class Command(Command):
 
     def get_probes_number(self):
         '''
-        Try to get the probes that were used for this OneOff. If we don't get
-        the number of probes we requested sleep 10secs to make sure we have a
-        correct answer. If after waiting totally 20secs we don't get what we
-        requested most likely we will never get them.
+        Try to get the number of probes that were used for this OneOff. Using
+        all_scheduling_requests_fulfille parameter in the meta response we can 
+        be sure when the allocated probes number is the final.
         '''
-        url_meta = '%s/api/v1/measurement/%s/?fields=probes,result' % (self.server, self.msm_id)
-        tries = 2
+        url_meta = '%s/api/v1/measurement/%s/?fields=probes,result,all_scheduling_requests_fulfilled' % (self.server, self.msm_id)
+        tries = 5
         for i, _ in enumerate(range(0, tries)):
             metadata = self.http_get(url_meta)
             if not metadata:
                 return False
-            if len(metadata['probes']) >= 0.9 * self.probes_number:
-                print (
-                    "Seems we got more than 90%% (%d) of requested probes, sleeping for "
-                    "5 more secs to be sure we get the maximum probes Atlas can give us."
-                ) % len(metadata['probes'])
-                time.sleep(5)
+            if metadata['all_scheduling_requests_fulfilled']:
                 break
             else:
                 if i + 1 >= tries:
                     break
-                print (
-                    "Seems we got only %d probes, sleeping for %d "
-                    "more secs to be sure we get the maximum probes Atlas can give us."
-                ) % (len(metadata['probes']), self.sleep_time)
-                time.sleep(self.sleep_time)
+                print "RIPE Atlas scheduling seems to be on process, sleeping for 5 more secs."
+                time.sleep(5)
         self.nprobes = len(metadata['probes'])
         self.url_results = '%s%s' % (self.server, metadata['result'])
 
