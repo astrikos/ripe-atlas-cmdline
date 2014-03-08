@@ -15,7 +15,8 @@ class Command(AtlasCommand):
             help='File containing api key.'
         ),
         make_option(
-            '-i', '--id', type='string', dest='msm_ids',
+            '-i', '--id', action='append',
+            type='int', dest='msm_ids', default=[],
             help='UDM id(s). This can be multiple values separated by commas.'
         ),
     ]
@@ -34,7 +35,7 @@ class Command(AtlasCommand):
             self.safe_options = False
             return
 
-        self.msm_ids = self.parser_options.msm_ids.split(',')
+        self.msm_ids = self.parser_options.msm_ids
 
         if not self.parser_options.key_file:
             print 'You have to specify the file that holds your api key.'
@@ -47,10 +48,9 @@ class Command(AtlasCommand):
             print traceback.format_exc()
             print 'Error while reading configuration'
 
-
     def run(self):
         for msm_id in self.msm_ids:
-            url = '%s%s%s/?key=%s' % (self.server, self.url_path, msm_id, self.key)
+            url = '%s%s%d/?key=%s' % (self.server, self.url_path, msm_id, self.key)
             response = self.http_delete(url)
             if response:
                 if response[0] / 100 == 2:
@@ -70,9 +70,12 @@ class Command(AtlasCommand):
         req.get_method = lambda: 'DELETE'
         try:
             response = urllib2.urlopen(req)
+        except urllib2.HTTPError as e:
+            print "HTTP ERROR %d: %s <%s>" % (e.code, e.msg, e.read())
         except:
             print 'Problem with HTTP request (url: %s).' % url
             print traceback.format_exc()
+        finally:
             return False
 
         return (response.code, response.msg)
