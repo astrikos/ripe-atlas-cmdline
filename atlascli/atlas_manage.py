@@ -3,9 +3,9 @@ import sys
 
 
 def main():
-    '''
+    """
     Main script that runs the specified module or gives existent modules.
-    '''
+    """
 
     try:
         module = sys.argv.pop(1)
@@ -13,7 +13,7 @@ def main():
         class_object = m.Command(sys.argv[1:])
     except (IndexError, ImportError) as e:
         if e.__class__.__name__ == 'ImportError':
-            print 'No such command.'
+            print("No such command.")
         m = __import__('commands', globals(), locals(), [], -1)
         class_object = m.AtlasCommand(sys.argv[1:])
 
