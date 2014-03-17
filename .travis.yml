@@ -1,0 +1,11 @@
+language: python
+env:
+  - TOXENV=py26
+  - TOXENV=py27
+install:
+  - pip install tox --use-mirrors
+  - pip install coveralls --use-mirrors
+script:
+  - tox
+after_success:
+  coveralls
