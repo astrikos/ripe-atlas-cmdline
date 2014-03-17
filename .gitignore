@@ -34,3 +34,6 @@ nosetests.xml
 
 # virtualenvs
 python/
+
+# test post file
+post_data
