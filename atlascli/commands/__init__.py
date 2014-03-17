@@ -1,6 +1,5 @@
 import urllib2
 import json
-import traceback
 import pkgutil
 from optparse import OptionParser, make_option
 
@@ -29,14 +28,14 @@ class AtlasCommand(object):
             print self.help
 
     def run(self):
-        print 'Available commands:'
+        print('Available commands:')
         for _, package_name, _ in pkgutil.iter_modules(['./commands']):
             print package_name
 
     def http_get(self, url):
-        '''
-        Common fuction that implements a http get given a url
-        '''
+        """
+        Common function that implements a http get given a url
+        """
         req = urllib2.Request(url)
         req.add_header('Content-Type', 'application/json')
         req.add_header('Accept', 'application/json')

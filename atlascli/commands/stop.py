@@ -50,15 +50,18 @@ class Command(AtlasCommand):
 
     def run(self):
         for msm_id in self.msm_ids:
-            url = '%s%s%d/?key=%s' % (self.server, self.url_path, msm_id, self.key)
+            url = '%s%s%d/?key=%s' % (
+                self.server, self.url_path, msm_id, self.key
+            )
             response = self.http_delete(url)
             if response:
                 if response[0] / 100 == 2:
                     print 'UMD: #%s was stopped successfully.' % msm_id
                 else:
-                    print 'UMD: #%s was not stopped successfully. Return with HTTP code: %d and msg: %s' % (
-                        msm_id, response[0], response[1]
-                    )
+                    print (
+                        'UMD: #%s was not stopped successfully. '
+                        'Return with HTTP code: %d and msg: %s'
+                    ) % (msm_id, response[0], response[1])
 
     def http_delete(self, url):
         '''

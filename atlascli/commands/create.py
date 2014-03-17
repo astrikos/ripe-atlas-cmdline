@@ -1,7 +1,6 @@
 import json
 import urllib2
 import traceback
-from distutils.util import strtobool
 from optparse import make_option
 
 from . import AtlasCommand
@@ -25,6 +24,9 @@ class Command(AtlasCommand):
 
     def __init__(self, *args, **kwargs):
         super(Command, self).__init__(*args, **kwargs)
+        self.measurement_type = None
+        self.msm_id = None
+        self.tries = 2
         if not self.parser_options.help_text:
             self._initialize()
 
@@ -33,17 +35,29 @@ class Command(AtlasCommand):
         Holds different stuff that we should do in init but we'd rather keep
         __init__ clean.
         '''
-        if not self.parser_options.key_file:
-            print 'You have to specify the file that holds your api key.'
+        key = self.get_api_key()
+        if not key:
+            print('You have to specify a valid API key.')
             self.safe_options = False
             return
-        try:
-            f = open(self.parser_options.key_file, 'r')
-            self.key = f.read().strip()
-            self.url = '%s%s' % (self.server, self.url_path % self.key)
-        except:
-            print traceback.format_exc()
-            print 'Error while reading configuration'
+        self.url = '%s%s' % (self.server, self.url_path % key)
+
+    def get_api_key(self):
+        """Gets API key either from a given file or by stdin."""
+        if not self.parser_options.key_file:
+            key = raw_input("Specify your API key: ")
+            if not key:
+                return False
+        else:
+            try:
+                f = open(self.parser_options.key_file, 'r')
+                key = f.read().strip()
+            except:
+                print traceback.format_exc()
+                print "Error while reading given API key file."
+                return False
+
+        return key
 
     def run(self):
         '''
@@ -55,119 +69,232 @@ class Command(AtlasCommand):
         if self.parser_options.post_data_file:
             f = open(self.parser_options.post_data_file, 'r')
             self.post_data = json.loads(f.read().strip())
-            msm_id = self.create()
-            if msm_id:
-                print 'A new UDM just created with id: %d' % msm_id
         else:
             try:
-                self.stdin_options()
+                self.data_from_stdin()
                 confirm_msg = (
                     'You are about to create a new RIPE Atlas UDM with the '
                     'following details:\n%s\n[y/n]:'
                 ) % self.post_data
-                if raw_input(confirm_msg) == 'y':
-                    msm_id = self.create()
-                    if msm_id:
-                        print 'A new UDM just created with id: %d' % msm_id
-                else:
+                if raw_input(confirm_msg) != 'y':
                     print 'Just exiting.'
+                    return True
             except KeyboardInterrupt:
-                pass
+                return True
 
-    def stdin_options(self):
-        '''
-        Collects from stdin all information that a user most likely wants to
-        specify.
-        '''
-        # definitions part
-        definitions = {}
-        # --- required fields
-        self.target = raw_input('Specify Target:')
-        while not self.target:
-            self.target = raw_input('Target is required:')
-        definitions['target'] = self.target
-        self.type = raw_input('Specify Type:')
-        while not self.type:
-            self.type = raw_input('Type is required:')
-        definitions['type'] = self.type
-        if self.type == 'traceroute':
-            self.trace_protocol = raw_input('Specify  Traceroute Protocol[ICMP/UDP]:')
-            definitions['protocol'] = self.trace_protocol
-            while not self.trace_protocol:
-                self.self.trace_protocol = raw_input('Protocol is required:')
-                definitions['protocol'] = self.trace_protocol
-        while True:
-            try:
-                self.af = int(raw_input('Specify Protocol[4/6]:'))
-                if self.af not in (4, 6):
-                    raise ValueError()
-                break
-            except ValueError:
-                print 'Please specify 4 or 6.'
-        definitions['af'] = self.af
-        self.description = raw_input('Specify Description:')
-        while not self.description:
-            self.description = raw_input('Description is required:')
-        definitions['description'] = self.description
+        msm_id = self.create()
+        if msm_id:
+            self.msm_id = msm_id
+            print 'A new UDM just created with id: %d' % msm_id
+            return True
 
-        # --- non required fields
-        try:
-            self.is_oneoff = strtobool(raw_input('Is it OneOff [y/n]:'))
-        except ValueError:
-            print 'You make me sad :( I assume "n".'
-            self.is_oneoff = False
-        definitions['is_oneoff'] = 'true' if self.is_oneoff else 'false'
-        if not self.is_oneoff:
-            interval = raw_input('Specify Interval:')
-            if interval:
-                definitions['interval'] = interval
+        return False
+
+    def get_type(self):
+        """Gets the type of the new measurement from user input."""
+        msg = 'Specify Type[ping/traceroute/dns/sslcert]:'
+        for i in range(self.tries):
+            measurement_type = raw_input(msg).strip()
+            if measurement_type in ('ping', 'traceroute', 'dns', 'sslcert'):
+                return measurement_type
+
+        raise InvalidEntry('Invalid entry for measurement type.')
+
+    def get_target(self):
+        """Gets the target of the new measurement from user input."""
+        msg = "Specify Target"
+        warning_msg = ""
+        for i in range(self.tries):
+            target = raw_input("%s:" % (msg + warning_msg)).strip()
+            if target:
+                return target
+            elif target == "" and self.measurement_type == "dns":
+                return target
+            elif target == "":
+                warning_msg = "(target should be an non empty string.)"
+
+        raise InvalidEntry('Invalid entry for measurement target.')
+
+    def get_type_protocol(self):
+        """
+        If type of measurement is traceroute then protocol should be added
+        as well.
+        """
+        msg = 'Specify Traceroute Protocol[ICMP/UDP/TCP]:'
+        for i in range(self.tries):
+            trace_protocol = raw_input(msg).strip()
+            if trace_protocol in ("ICMP", "UDP", "TCP"):
+                return trace_protocol
+
+        raise InvalidEntry('Invalid entry for traceroute protocol.')
+
+    def get_ip_version(self):
+        """Gets the version of ip of the new measurement from user input."""
+        msg = 'Specify Protocol[4/6]:'
+        for i in range(self.tries):
+            af = raw_input(msg).strip()
+            if af in ("4", "6"):
+                return int(af)
+
+        raise InvalidEntry('Invalid entry for IP version.')
+
+    def get_description(self):
+        """Gets the description of the new measurement from user input."""
+        msg = "Specify Description:"
+        for i in range(self.tries):
+            description = raw_input(msg).strip()
+            if description:
+                return description
+
+        raise InvalidEntry('Invalid entry for measurement description.')
+
+    def get_is_oneoff(self):
+        """Is new measurement ONEOFF."""
+        mapping = {"y": True, "n": False}
+        msg = "Is it OneOff [y/n]:"
+        for i in range(self.tries):
+            is_oneoff = raw_input(msg).strip()
+            if is_oneoff in ("y", "n"):
+                return mapping[is_oneoff]
+
+        raise InvalidEntry('Invalid entry for oneoff boolean.')
+
+    def get_interval(self):
+        """Gets the interval of the new measurement from user input."""
+        msg = "Specify Interval[Leave blank for default]:"
+        for i in range(self.tries):
+            interval = raw_input(msg).strip()
+            if interval == "":
+                return interval
+            if interval.isdigit() and interval != '0':
+                return int(interval)
+
+        raise InvalidEntry('Invalid entry for measurement interval.')
+
+    def get_additional_options(self):
+        """
+        Gets the additional options for the new measurement from user input.
+        """
+        additional_options = {}
         if raw_input('Do you need any additional options [y/n]:') == 'y':
-            additional_options = {}
             while True:
                 option = raw_input('Specify option:')
+                if not option:
+                    break
                 value = raw_input('Specify value:')
                 additional_options[option] = value
                 if raw_input('More [y/n]:') == 'y':
                     continue
                 else:
                     break
+
+        return additional_options
+
+    def fill_definitions(self):
+        """Fill definitions structure from user input."""
+
+        definitions = {}
+        self.measurement_type = definitions["type"] = self.get_type()
+        definitions["target"] = self.get_target()
+        if self.measurement_type == 'traceroute':
+            definitions["protocol"] = self.get_type_protocol()
+        definitions["af"] = self.get_ip_version()
+        definitions["description"] = self.get_description()
+        self.is_oneoff = definitions["is_oneoff"] = self.get_is_oneoff()
+        if not self.is_oneoff:
+            interval = self.get_interval()
+            if interval:
+                definitions["interval"] = interval
+        additional_options = self.get_additional_options()
+        if additional_options:
             definitions.update(additional_options)
         self.post_data['definitions'] = [definitions]
-        # times part
-        self.start_time = raw_input(
-            'Specify Start Time [Unix Timestamp\Leave blank for now]:'
-        )
-        if self.start_time != '':
-            self.post_data['start_time'] = self.start_time
+
+    def get_start_time(self):
+        """Gets the start time for the new measurement from user input."""
+        msg = "Specify Start Time [Unix Timestamp\Leave blank for now]:"
+        for i in range(self.tries):
+            start_time = raw_input(msg).strip()
+            if start_time == "":
+                return start_time
+            if start_time.isdigit() and start_time > "0":
+                return int(start_time)
+
+        raise InvalidEntry('Invalid entry for measurement start time.')
+
+    def get_end_time(self):
+        """Gets the end time for the new measurement from user input."""
+        msg = "Specify End Time [Unix Timestamp\Leave blank for never]:"
+        for i in range(self.tries):
+            end_time = raw_input(msg).strip()
+            if end_time == "":
+                return end_time
+            if end_time.isdigit() and end_time > "0":
+                return int(end_time)
+
+        raise InvalidEntry('Invalid entry for measurement end time.')
+
+    def fill_times(self):
+        """Fill times from user input."""
+        start_time = self.get_start_time()
+        if start_time:
+            self.post_data['start_time'] = start_time
         if not self.is_oneoff:
-            self.end_time = raw_input(
-                'Specify End Time [Unix Timestamp\Leave blank for never]:'
-            )
-            if self.end_time != '':
-                self.post_data['stop_time'] = self.end_time
-        # probes part
-        probes = {}
-        while True:
-            try:
-                self.probes_number = int(raw_input('Specify Number of Probes (Integer):'))
-                break
-            except ValueError:
-                print 'Please specify a number.'
-        probes['requested'] = self.probes_number
-        self.probe_source_type = raw_input(
-            'Specify Probes Source Type [area/country/prefix/asn/probes/msm]:'
+            end_time = self.get_end_time()
+            if end_time:
+                self.post_data['end_time'] = end_time
+
+    def get_probes_number(self):
+        """Get number of probes requested from user input."""
+        msg = "Specify Number of Probes (Integer):"
+        for i in range(self.tries):
+            probes_number = raw_input(msg).strip()
+            if probes_number.isdigit() and probes_number > '0':
+                return int(probes_number)
+
+        raise InvalidEntry('Invalid entry for number of probes.')
+
+    def get_probes_source_type(self):
+        """Get the source of probes from user input."""
+        msg = (
+            "Specify Probes Source Type [area/country/prefix/asn/probes/msm]:"
         )
-        probes['type'] = self.probe_source_type
-        if self.probe_source_type == 'area':
-            msg = (
-                'Specify Probes Source [WW/West/North-Central/'
-                'South-Central/North-East/South-East]:'
-            )
-        else:
-            msg = 'Specify Probes Source:'
-        self.probe_source = raw_input(msg)
-        probes['value'] = self.probe_source
+        accepted_sources = (
+            "area", "country", "prefix", "asn", "probes", "msm"
+        )
+        for i in range(self.tries):
+            probe_source_type = raw_input(msg).strip()
+            if probe_source_type in accepted_sources:
+                return probe_source_type
+
+        raise InvalidEntry("Invalid entry for probe's source.")
+
+    def get_probes_source_value(self):
+        """Get the value of source of probes from user input."""
+        msg = "Specify Probes Source:"
+        for i in range(self.tries):
+            probe_source = raw_input(msg).strip()
+            if probe_source:
+                return probe_source
+
+        raise InvalidEntry("Invalid entry for value of probe's source.")
+
+    def fill_probes(self):
+        """Fill probes structure from user input."""
+        probes = {}
+        probes['requested'] = self.get_probes_number()
+        probes['type'] = self.get_probes_source_type()
+        probes['value'] = self.get_probes_source_value()
         self.post_data['probes'] = [probes]
+
+    def data_from_stdin(self):
+        '''
+        Collects from stdin all information that a user most likely wants to
+        specify.
+        '''
+        self.fill_definitions()
+        self.fill_times()
+        self.fill_probes()
 
     def create(self):
         '''
@@ -183,5 +310,17 @@ class Command(AtlasCommand):
             log = "HTTP ERROR %d: %s <%s>" % (e.code, e.msg, e.read())
             print log
             return False
+
         response = json.load(response)
-        return response['measurements'][0]
+        if (
+            'measurements' in response and
+            isinstance(response['measurements'], list)
+        ):
+            return response['measurements'][0]
+        else:
+            print "HTTP output was not what we expected <%s>" % response
+            return False
+
+
+class InvalidEntry(Exception):
+    pass

@@ -14,16 +14,18 @@ class Command(AtlasCommand):
     options = [
         make_option(
             '-f', '--file', type='string', dest='key_file',
-            help='File containing api key. Specifing this option will fetch only UDMs belonging to you.'
+            help=(
+                'File containing api key. Specifing this option '
+                'will fetch only UDMs belonging to you.'
+            )
         ),
         make_option(
             '-t', '--flat', action='store_true', default=False,
             dest='flat', help='Gives back a flat list of msm_ids.'
         ),
-    ] 
+    ]
 
     url_path = '/api/v1/measurement/'
-
 
     def __init__(self, *args, **kwargs):
         super(Command, self).__init__(*args, **kwargs)
@@ -60,9 +62,8 @@ class Command(AtlasCommand):
             else:
                 url_query = '?fields=%s' % (','.join(self.fields))
 
-
         url = '%s%s%s' % (self.server, self.url_path, url_query)
-         
+
         results = self.http_get(url)
         if not results:
             return
@@ -70,7 +71,9 @@ class Command(AtlasCommand):
         full_results = not bool(self.parser_options.flat)
         if self.parser_options.flat:
             try:
-                print ','.join(map(str, [k['msm_id'] for k in results['objects']]))
+                print ','.join(
+                    map(str, [k['msm_id'] for k in results['objects']])
+                )
             except:
                 full_results = True
 
@@ -94,7 +97,11 @@ class Command(AtlasCommand):
                     break
         # fields part
         self.fields = []
-        if raw_input('Do you want to specify any field (Otherwise you will get all) [y/n]:') == 'y':
+        msg = (
+            'Do you want to specify any field (Otherwise you will get all) '
+            '[y/n]:'
+        )
+        if raw_input(msg) == 'y':
             while True:
                 field = raw_input('Specify field:')
                 self.fields.append(field)

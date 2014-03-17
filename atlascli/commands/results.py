@@ -16,7 +16,9 @@ class Command(AtlasCommand):
         ),
         make_option(
             '-s', '--store', action='store_true', default=False,
-            dest='store', help='store the results to results.<udm_id>.json file'
+            dest='store', help=(
+                'store the results to results.<udm_id>.json file'
+            )
         ),
     ]
 
@@ -41,9 +43,14 @@ class Command(AtlasCommand):
         results = self.http_get(self.url)
         if not results:
             return
-        print 'Got %d results for UDM id: %d.' % (len(results), self.parser_options.msm_id)
+        print 'Got %d results for UDM id: %d.' % (
+            len(results), self.parser_options.msm_id
+        )
         if self.parser_options.store:
-            print 'Writing results to results.%d.json...' % self.parser_options.msm_id
+            msg = (
+                'Writing results to results.%d.json...'
+            ) % self.parser_options.msm_id
+            print msg
             open('results.%d.json' % self.parser_options.msm_id, 'w').write(
                 json.dumps(results)
             )

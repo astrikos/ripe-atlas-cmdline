@@ -1,5 +1,3 @@
-import json
-import urllib2
 from optparse import make_option
 
 from . import AtlasCommand
