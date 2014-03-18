@@ -1,6 +1,6 @@
 RIPE Atlas Command Line Manager
 ========================
-![Build Status](https://travis-ci.org/astrikos/ripe-atlas-cmdline.png?branch=master)](https://travis-ci.org/astrikos/ripe-atlas-cmdline)
+[![Build Status](https://travis-ci.org/astrikos/ripe-atlas-cmdline.png?branch=master)](https://travis-ci.org/astrikos/ripe-atlas-cmdline)
 Overview
 --------------------
 A modular and extendable manager for RIPE Atlas API.
