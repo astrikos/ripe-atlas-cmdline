@@ -33,3 +33,5 @@ Adding Commands
 A new command can be added by adding a python file inside commands directory and
 create a class with the name Command. There is a template example that anyone 
 can use and write its own commands following the template.
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/astrikos/ripe-atlas-cmdline/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
