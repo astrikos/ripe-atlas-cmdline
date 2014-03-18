@@ -17,6 +17,7 @@ Running just:
         ./atlas_manage.py
 
 will list you the already existent commands.
+
 If you want to see the additional options for every command use -h option e.g.
 
         ./atlas_manage.py create -h
