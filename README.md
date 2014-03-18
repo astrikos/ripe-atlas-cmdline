@@ -1,6 +1,6 @@
 RIPE Atlas Command Line Manager
 ========================
-[![Build Status](https://travis-ci.org/astrikos/ripe-atlas-cmdline.png?branch=master)](https://travis-ci.org/astrikos/ripe-atlas-cmdline)
+[![Build Status](https://travis-ci.org/astrikos/ripe-atlas-cmdline.png?branch=master)](https://travis-ci.org/astrikos/ripe-atlas-cmdline)[![Code Health](https://landscape.io/github/astrikos/ripe-atlas-cmdline/master/landscape.png)](https://landscape.io/github/astrikos/ripe-atlas-cmdline/master)
 Overview
 --------------------
 A modular and extendable manager for RIPE Atlas API.
@@ -33,5 +33,3 @@ Adding Commands
 A new command can be added by adding a python file inside commands directory and
 create a class with the name Command. There is a template example that anyone 
 can use and write its own commands following the template.
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/astrikos/ripe-atlas-cmdline/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
