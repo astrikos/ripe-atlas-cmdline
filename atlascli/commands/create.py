@@ -50,8 +50,8 @@ class Command(AtlasCommand):
                 return False
         else:
             try:
-                f = open(self.parser_options.key_file, 'r')
-                key = f.read().strip()
+                file_descriptor = open(self.parser_options.key_file, 'r')
+                key = file_descriptor.read().strip()
             except:
                 print traceback.format_exc()
                 print "Error while reading given API key file."
@@ -67,8 +67,8 @@ class Command(AtlasCommand):
         # if we have a file with ready post data skip reading from stdin and do
         # request.
         if self.parser_options.post_data_file:
-            f = open(self.parser_options.post_data_file, 'r')
-            self.post_data = json.loads(f.read().strip())
+            file_descriptor = open(self.parser_options.post_data_file, 'r')
+            self.post_data = json.loads(file_descriptor.read().strip())
         else:
             try:
                 self.data_from_stdin()
@@ -93,7 +93,7 @@ class Command(AtlasCommand):
     def get_type(self):
         """Gets the type of the new measurement from user input."""
         msg = 'Specify Type[ping/traceroute/dns/sslcert]:'
-        for i in range(self.tries):
+        for _ in range(self.tries):
             measurement_type = raw_input(msg).strip()
             if measurement_type in ('ping', 'traceroute', 'dns', 'sslcert'):
                 return measurement_type
@@ -104,7 +104,7 @@ class Command(AtlasCommand):
         """Gets the target of the new measurement from user input."""
         msg = "Specify Target"
         warning_msg = ""
-        for i in range(self.tries):
+        for _ in range(self.tries):
             target = raw_input("%s:" % (msg + warning_msg)).strip()
             if target:
                 return target
@@ -121,7 +121,7 @@ class Command(AtlasCommand):
         as well.
         """
         msg = 'Specify Traceroute Protocol[ICMP/UDP/TCP]:'
-        for i in range(self.tries):
+        for _ in range(self.tries):
             trace_protocol = raw_input(msg).strip()
             if trace_protocol in ("ICMP", "UDP", "TCP"):
                 return trace_protocol
@@ -131,17 +131,17 @@ class Command(AtlasCommand):
     def get_ip_version(self):
         """Gets the version of ip of the new measurement from user input."""
         msg = 'Specify Protocol[4/6]:'
-        for i in range(self.tries):
-            af = raw_input(msg).strip()
-            if af in ("4", "6"):
-                return int(af)
+        for _ in range(self.tries):
+            addr_family = raw_input(msg).strip()
+            if addr_family in ("4", "6"):
+                return int(addr_family)
 
         raise InvalidEntry('Invalid entry for IP version.')
 
     def get_description(self):
         """Gets the description of the new measurement from user input."""
         msg = "Specify Description:"
-        for i in range(self.tries):
+        for _ in range(self.tries):
             description = raw_input(msg).strip()
             if description:
                 return description
@@ -152,7 +152,7 @@ class Command(AtlasCommand):
         """Is new measurement ONEOFF."""
         mapping = {"y": True, "n": False}
         msg = "Is it OneOff [y/n]:"
-        for i in range(self.tries):
+        for _ in range(self.tries):
             is_oneoff = raw_input(msg).strip()
             if is_oneoff in ("y", "n"):
                 return mapping[is_oneoff]
@@ -162,7 +162,7 @@ class Command(AtlasCommand):
     def get_interval(self):
         """Gets the interval of the new measurement from user input."""
         msg = "Specify Interval[Leave blank for default]:"
-        for i in range(self.tries):
+        for _ in range(self.tries):
             interval = raw_input(msg).strip()
             if interval == "":
                 return interval
@@ -213,7 +213,7 @@ class Command(AtlasCommand):
     def get_start_time(self):
         """Gets the start time for the new measurement from user input."""
         msg = "Specify Start Time [Unix Timestamp\Leave blank for now]:"
-        for i in range(self.tries):
+        for _ in range(self.tries):
             start_time = raw_input(msg).strip()
             if start_time == "":
                 return start_time
@@ -225,7 +225,7 @@ class Command(AtlasCommand):
     def get_end_time(self):
         """Gets the end time for the new measurement from user input."""
         msg = "Specify End Time [Unix Timestamp\Leave blank for never]:"
-        for i in range(self.tries):
+        for _ in range(self.tries):
             end_time = raw_input(msg).strip()
             if end_time == "":
                 return end_time
@@ -247,7 +247,7 @@ class Command(AtlasCommand):
     def get_probes_number(self):
         """Get number of probes requested from user input."""
         msg = "Specify Number of Probes (Integer):"
-        for i in range(self.tries):
+        for _ in range(self.tries):
             probes_number = raw_input(msg).strip()
             if probes_number.isdigit() and probes_number > '0':
                 return int(probes_number)
@@ -262,7 +262,7 @@ class Command(AtlasCommand):
         accepted_sources = (
             "area", "country", "prefix", "asn", "probes", "msm"
         )
-        for i in range(self.tries):
+        for _ in range(self.tries):
             probe_source_type = raw_input(msg).strip()
             if probe_source_type in accepted_sources:
                 return probe_source_type
@@ -272,7 +272,7 @@ class Command(AtlasCommand):
     def get_probes_source_value(self):
         """Get the value of source of probes from user input."""
         msg = "Specify Probes Source:"
-        for i in range(self.tries):
+        for _ in range(self.tries):
             probe_source = raw_input(msg).strip()
             if probe_source:
                 return probe_source
@@ -306,8 +306,8 @@ class Command(AtlasCommand):
         req.add_header('Accept', 'application/json')
         try:
             response = urllib2.urlopen(req, post_data)
-        except urllib2.HTTPError as e:
-            log = "HTTP ERROR %d: %s <%s>" % (e.code, e.msg, e.read())
+        except urllib2.HTTPError as exc:
+            log = "HTTP ERROR %d: %s <%s>" % (exc.code, exc.msg, exc.read())
             print log
             return False
 
