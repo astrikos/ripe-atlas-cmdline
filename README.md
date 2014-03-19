@@ -1,6 +1,6 @@
 RIPE Atlas Command Line Manager
 ========================
-[![Build Status](https://travis-ci.org/astrikos/ripe-atlas-cmdline.png?branch=master)](https://travis-ci.org/astrikos/ripe-atlas-cmdline) [![Code Health](https://landscape.io/github/astrikos/ripe-atlas-cmdline/master/landscape.png)](https://landscape.io/github/astrikos/ripe-atlas-cmdline/master)
+[![Build Status](https://travis-ci.org/astrikos/ripe-atlas-cmdline.png?branch=master)](https://travis-ci.org/astrikos/ripe-atlas-cmdline) [![Code Health](https://landscape.io/github/astrikos/ripe-atlas-cmdline/master/landscape.png)](https://landscape.io/github/astrikos/ripe-atlas-cmdline/master) [![Coverage Status](https://coveralls.io/repos/astrikos/ripe-atlas-cmdline/badge.png?branch=master)](https://coveralls.io/r/astrikos/ripe-atlas-cmdline?branch=master)
 Overview
 --------------------
 A modular and extendable manager for RIPE Atlas API.
