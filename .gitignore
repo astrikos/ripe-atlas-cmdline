@@ -37,3 +37,6 @@ python/
 
 # test post file
 post_data
+
+# vim swp files
+*.swp
