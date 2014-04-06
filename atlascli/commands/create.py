@@ -37,7 +37,7 @@ class Command(AtlasCommand):
         """
         key = self.get_api_key()
         if not key:
-            print("You have to specify a valid API key.")
+            print "You have to specify a valid API key."
             self.safe_options = False
             return
         self.url = "%s%s" % (self.server, self.url_path % key)
