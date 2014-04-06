@@ -8,17 +8,17 @@ from . import AtlasCommand
 
 class Command(AtlasCommand):
 
-    help = 'Create a new RIPE Atlas UDM.'
-    url_path = '/api/v1/measurement/?key=%s'
+    help = "Create a new RIPE Atlas UDM."
+    url_path = "/api/v1/measurement/?key=%s"
     post_data = {}
     options = [
         make_option(
-            '-f', '--file', type='string', dest='key_file',
-            help='File containing api key.'
+            "-f", "--file", type="string", dest="key_file",
+            help="File containing api key."
         ),
         make_option(
-            '-p', '--post_file', type='string', dest='post_data_file',
-            help='File containing post data.'
+            "-p", "--post_file", type="string", dest="post_data_file",
+            help="File containing post data."
         ),
     ]
 
@@ -31,16 +31,16 @@ class Command(AtlasCommand):
             self._initialize()
 
     def _initialize(self):
-        '''
+        """
         Holds different stuff that we should do in init but we'd rather keep
         __init__ clean.
-        '''
+        """
         key = self.get_api_key()
         if not key:
-            print('You have to specify a valid API key.')
+            print("You have to specify a valid API key.")
             self.safe_options = False
             return
-        self.url = '%s%s' % (self.server, self.url_path % key)
+        self.url = "%s%s" % (self.server, self.url_path % key)
 
     def get_api_key(self):
         """Gets API key either from a given file or by stdin."""
@@ -50,7 +50,7 @@ class Command(AtlasCommand):
                 return False
         else:
             try:
-                file_descriptor = open(self.parser_options.key_file, 'r')
+                file_descriptor = open(self.parser_options.key_file, "r")
                 key = file_descriptor.read().strip()
             except:
                 print traceback.format_exc()
@@ -60,45 +60,46 @@ class Command(AtlasCommand):
         return key
 
     def run(self):
-        '''
+        """
         Main function that collects all users information from stdin, and
         creates a new UDM.
-        '''
+        """
         # if we have a file with ready post data skip reading from stdin and do
         # request.
         if self.parser_options.post_data_file:
-            file_descriptor = open(self.parser_options.post_data_file, 'r')
+            file_descriptor = open(self.parser_options.post_data_file, "r")
             self.post_data = json.loads(file_descriptor.read().strip())
         else:
             try:
                 self.data_from_stdin()
                 confirm_msg = (
-                    'You are about to create a new RIPE Atlas UDM with the '
-                    'following details:\n%s\n[y/n]:'
+                    "You are about to create a new RIPE Atlas UDM with the "
+                    "following details:\n%s\n[y/n]:"
                 ) % self.post_data
-                if raw_input(confirm_msg) != 'y':
-                    print 'Just exiting.'
-                    return True
+                if raw_input(confirm_msg) != "y":
+                    print "Just exiting."
+                    return False
             except KeyboardInterrupt:
-                return True
+                return False
 
         msm_id = self.create()
-        if msm_id:
-            self.msm_id = msm_id
-            print 'A new UDM just created with id: %d' % msm_id
-            return True
+        if not msm_id:
+            return False
 
-        return False
+        self.msm_id = msm_id
+        print "A new UDM just created with id: %d" % msm_id
+
+        return True
 
     def get_type(self):
         """Gets the type of the new measurement from user input."""
-        msg = 'Specify Type[ping/traceroute/dns/sslcert]:'
+        msg = "Specify Type[ping/traceroute/dns/sslcert]:"
         for _ in range(self.tries):
             measurement_type = raw_input(msg).strip()
-            if measurement_type in ('ping', 'traceroute', 'dns', 'sslcert'):
+            if measurement_type in ("ping", "traceroute", "dns", "sslcert"):
                 return measurement_type
 
-        raise InvalidEntry('Invalid entry for measurement type.')
+        raise InvalidEntry("Invalid entry for measurement type.")
 
     def get_target(self):
         """Gets the target of the new measurement from user input."""
@@ -113,7 +114,7 @@ class Command(AtlasCommand):
             elif target == "":
                 warning_msg = "(target should be an non empty string.)"
 
-        raise InvalidEntry('Invalid entry for measurement target.')
+        raise InvalidEntry("Invalid entry for measurement target.")
 
     def get_type_protocol(self):
         """
