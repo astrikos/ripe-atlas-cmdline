@@ -43,22 +43,16 @@ class UnitTestOneOff(unittest.TestCase):
         args = ["-f", "tests/test_api_key"]
         self.cmd = OneOffCommand(args)
 
-    def create_patch(self, name):
-        patcher = mock.patch(name)
-        thing = patcher.start()
-        self.addCleanup(patcher.stop)
-        return thing
-
     def test_run(self):
         self.cmd.sleep_time = 0
         self.cmd.timeout = 0
-        create = self.create_patch('atlascli.commands.create.Command.run')
-        meta = self.create_patch(
+        create = mock.patch('atlascli.commands.create.Command.run').start()
+        meta = mock.patch(
             'atlascli.commands.oneoff.Command.get_meta_data'
-        )
-        results = self.create_patch(
+        ).start()
+        results = mock.patch(
             'atlascli.commands.oneoff.Command.get_results'
-        )
+        ).start()
 
         # UDM creation failed
         create.return_value = False
@@ -155,3 +149,6 @@ class UnitTestOneOff(unittest.TestCase):
                 self.assertEqual(file_results, json.dumps(response))
             finally:
                 os.remove(fpath)
+
+    def tearDown(self):
+        mock.patch.stopall()
