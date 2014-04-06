@@ -114,7 +114,7 @@ class UnitTestCreate(unittest.TestCase):
                 self.assertEqual(self.cmd.run(), False)
         seffect = side_effect + ['n']
         with mock.patch('__builtin__.raw_input', side_effect=seffect):
-            self.assertEqual(self.cmd.run(), True)
+            self.assertEqual(self.cmd.run(), False)
 
     def test_get_type(self):
         with mock.patch('__builtin__.raw_input', return_value='dummy_string'):
