@@ -2,8 +2,7 @@
 
 from setuptools import setup, find_packages
 
-from atlascli import __version__
-
+__version__ = "0.2"
 install_requires = []
 tests_require = [
     'nose',
@@ -25,4 +24,5 @@ setup(
     install_requires=install_requires,
     tests_require=tests_require,
     test_suite="nose.collector",
+    scripts=["scripts/atlas-manage"]
 )
