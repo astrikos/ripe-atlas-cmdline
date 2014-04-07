@@ -11,21 +11,21 @@ Using the manager
 ---------------------
 In order to use the manager you have to run:
 
-        ./atlas_manage.py <command> [options].
+        ./atlas-manage <command> [options].
 
 Running just:
 
-        ./atlas_manage.py
+        ./atlas-manage
 
 will list you the already existent commands.
 
 If you want to see the additional options for every command use -h option e.g.
 
-        ./atlas_manage.py create -h
+        ./atlas-manage create -h
 
 Specifing:
 
-        ./atlas_manage.py create --help_text
+        ./atlas-manage create --help_text
 
 as an option will show you a small description for every command.
 Adding Commands
