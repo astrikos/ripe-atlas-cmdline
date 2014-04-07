@@ -29,7 +29,8 @@ class AtlasCommand(object):
 
     def run(self):
         print "Available commands:"
-        for _, package_name, _ in pkgutil.iter_modules(["./commands"]):
+        paths = ["./atlascli/commands"]
+        for _, package_name, _ in pkgutil.iter_modules(paths):
             print package_name
 
     def http_get(self, url):
